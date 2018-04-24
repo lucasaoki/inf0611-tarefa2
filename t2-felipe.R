@@ -123,6 +123,40 @@ genLabelsPerPartition <- function(data, partitions, totalSize) {
   return(result)
 }
 
+plotDiscrete <- function(ANorm, BNorm, numPartitions, dimens) {
+  size <- length(ANorm)
+  points <- c(1:size)
+  partitions <- gaussianEqProbPartitions(numPartitions)
+  
+  APaa <- paa(ANorm, dimens)
+  BPaa <- paa(BNorm, dimens)
+  
+  Asym <- convertToEqualProbSymbols(APaa,i)
+  APaaPlot <- rep(APaa, times=1, each=6)
+  BPaaPlot <- rep(BPaa, times=1, each=6)
+  Alabels <- genLabelsPerPartition(APaa, numPartitions, size)
+  Blabels <- genLabelsPerPartition(BPaa, numPartitions, size)
+  
+  dFrame <- data.frame(ANorm, BNorm, APaaPlot, BPaaPlot ,points, Alabels, Blabels)
+  g <- ggplot(data = dFrame) + 
+    labs(title=paste("Séries com", numPartitions, "partições"), y="Valores Normalizados", x="Número da medição") +
+    theme(plot.title = element_text(hjust = 0.5, size = 12)) +
+    geom_hline(yintercept = partitions, alpha = 0.4, colour="#003366") +
+    scale_y_continuous(breaks=partitions)
+  
+  g <- g +
+    geom_line(aes(x=points, y=APaaPlot), colour="#006633") +
+    geom_line(aes(x=points, y=ANorm), alpha=0.3, colour="#006633") +
+    geom_text(aes(x=points, y=APaaPlot, label=Alabels), nudge_y = 0.08, colour="#006633")
+  
+  g <- g +
+    geom_line(aes(x=points, y=BPaaPlot), colour="#990000") +
+    geom_line(aes(x=points, y=BNorm), alpha=0.3, colour="#990000") +
+    geom_text(aes(x=points, y=BPaaPlot, label=Blabels), nudge_y = 0.08, colour="#990000")
+  
+  return(g)
+}
+
 dimens <- 24
 
 ANorm <- normalize(A)
@@ -138,23 +172,7 @@ for (i in c(4:7)) {
   print(minDist(ASym,BSym,dimens,length(A),i))
 }
 
-ASym <- convertToEqualProbSymbols(APaa,7)
-BSym <- convertToEqualProbSymbols(BPaa,7)
-
-minDist(ASym,BSym,dimens,length(A),7)
-
-
-#points <- rep(seq(from=0,by = length(A)/dimens,length=length(APaa)), times=1, each=2)
-#points <- c(points[2:length(points)],length(A))
-
-#APaaPlot <- rep(APaa, times=1, each=2)
-#BPaaPlot <- rep(BPaa, times=1, each=2)
-
-points <- c(1:length(A))
-Asym <- convertToEqualProbSymbols(APaa,i)
-APaaPlot <- rep(APaa, times=1, each=6)
-BPaaPlot <- rep(BPaa, times=1, each=6)
-text <- genLabelsPerPartition(APaa,4,length(A))
-
-dFrame <- data.frame(APaaPlot, BPaaPlot ,points, text)
-g <- ggplot(data = dFrame)  + geom_line(aes(x=points,y=APaaPlot)) + geom_text(nudge_y = 0.08,aes(x=points, y=APaaPlot, label=text))
+plotDiscrete(ANorm, BNorm, 4, dimens)
+plotDiscrete(ANorm, BNorm, 5, dimens)
+plotDiscrete(ANorm, BNorm, 6, dimens)
+plotDiscrete(ANorm, BNorm, 7, dimens)
