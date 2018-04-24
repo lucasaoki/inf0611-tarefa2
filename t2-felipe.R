@@ -137,22 +137,24 @@ plotDiscrete <- function(ANorm, BNorm, numPartitions, dimens) {
   Alabels <- genLabelsPerPartition(APaa, numPartitions, size)
   Blabels <- genLabelsPerPartition(BPaa, numPartitions, size)
   
-  dFrame <- data.frame(ANorm, BNorm, APaaPlot, BPaaPlot ,points, Alabels, Blabels)
-  g <- ggplot(data = dFrame) + 
-    labs(title=paste("Séries com", numPartitions, "partições"), y="Valores Normalizados", x="Número da medição") +
+  Norm <- c(ANorm, BNorm)
+  PaaPlot <- c(APaaPlot, BPaaPlot)
+  labels <- c(Alabels, Blabels)
+  keys <- rep(c("A","B"), times=1, each=length(A))
+  points <- c(points,points)
+  dFrame <- data.frame(Norm,PaaPlot,labels,points,keys)
+  
+  g <- ggplot(data = dFrame, aes(x=points)) + 
+    labs(title=paste("Séries com", numPartitions, "partições"), y="Valores Normalizados", x="Número da medição", colour="Séries") +
     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     geom_hline(yintercept = partitions, alpha = 0.4, colour="#003366") +
-    scale_y_continuous(breaks=partitions)
-  
+    scale_y_continuous(breaks=partitions) + 
+    scale_colour_manual(values=c("#990000", "#006633"))
+
   g <- g +
-    geom_line(aes(x=points, y=APaaPlot), colour="#006633") +
-    geom_line(aes(x=points, y=ANorm), alpha=0.3, colour="#006633") +
-    geom_text(aes(x=points, y=APaaPlot, label=Alabels), nudge_y = 0.08, colour="#006633")
-  
-  g <- g +
-    geom_line(aes(x=points, y=BPaaPlot), colour="#990000") +
-    geom_line(aes(x=points, y=BNorm), alpha=0.3, colour="#990000") +
-    geom_text(aes(x=points, y=BPaaPlot, label=Blabels), nudge_y = 0.08, colour="#990000")
+    geom_line(aes(y=PaaPlot, colour=keys)) +
+    geom_line(aes(x=points, y=Norm, colour=keys), alpha=0.5) +
+    geom_text(aes(x=points, y=PaaPlot, label=labels, colour=keys), nudge_y = 0.08, show.legend = F)
   
   return(g)
 }
