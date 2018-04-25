@@ -1,7 +1,8 @@
-####################################
-## INF-0611 - Trabalho 2 - Questao 1
-## Aluno: Felipe Wolff Ramos
-####################################
+#######################################
+## INF-0611 - Trabalho 2 - Questao 1 ##
+## Alunos: Felipe Wolff Ramos        ##
+##         Lucas Aoki Heredia        ##
+#######################################
 
 library(ggplot2)
 
@@ -145,7 +146,7 @@ plotDiscrete <- function(ANorm, BNorm, numPartitions, dimens) {
   dFrame <- data.frame(Norm,PaaPlot,labels,points,keys)
   
   g <- ggplot(data = dFrame, aes(x=points)) + 
-    labs(title=paste("Séries com", numPartitions, "partições"), y="Valores Normalizados", x="Número da medição", colour="Séries") +
+    labs(title=paste("Séries com", numPartitions, "símbolos"), y="Valores Normalizados", x="Número da medição", colour="Séries") +
     theme(plot.title = element_text(hjust = 0.5, size = 12)) +
     geom_hline(yintercept = partitions, alpha = 0.4, colour="#003366") +
     scale_y_continuous(breaks=partitions) + 
