@@ -6,6 +6,7 @@
 
 library(ggplot2)
 
+## Séries temporais fornecidas
 A <- c(21.7, 21.7, 21.6, 21.6, 21.7, 21.7, 21.7, 21.6, 21.5, 21.5, 21.4, 21.2,
        21.2, 21.1, 21.0, 20.9, 20.9, 21.0, 20.9, 20.9, 20.8, 20.7, 20.6, 20.6,
        20.5, 20.5, 20.5, 20.5, 20.5, 20.4, 20.3, 20.2, 20.1, 20.0, 20.0, 20.0,
@@ -31,7 +32,7 @@ B <- c(21.4, 21.3, 21.3, 20.9, 20.4, 20.0, 19.8, 19.9, 19.9, 19.7, 20.0, 19.8,
        19.7, 19.5, 19.3, 19.1, 19.0, 18.9, 18.7, 18.6, 18.5, 18.4, 18.4, 18.4, 
        18.4, 18.3, 18.3, 18.4, 18.4, 18.4, 18.4, 18.3, 18.3, 18.3, 18.4, 18.3)
 
-
+## Tabela pre-definida para discretização das séries normalizadas
 gaussianEqProbPartitions <- function(numPart) {
   partitions <- list(c(), 
                      c(), 
@@ -43,12 +44,14 @@ gaussianEqProbPartitions <- function(numPart) {
   return(partitions[[numPart]])
 }
 
+## Função para normalização das séries
 normalize <- function(data) {
   meanData <- mean(data)
   sdData <- sd(data)
   return((data - meanData) / sdData)
 }
 
+## Função de algoritmo do Piecewise Aggregate Approximation
 paa <- function(data, dimens) {
   combinationSize <- length(data) / dimens
   result <- c()
@@ -70,9 +73,9 @@ sumIfInRange <- function(value, cmp, min = NULL, max = NULL, by=1) {
   }
   return(value)
 }
-
 sumIfInRange <- Vectorize(sumIfInRange)
 
+## Função para discretização em símbolos
 convertToEqualProbSymbols <- function(data, partitions) {
   partLimits <- gaussianEqProbPartitions(partitions)
   result <- seq(from=1, by=0, length.out=length(data))
@@ -83,6 +86,7 @@ convertToEqualProbSymbols <- function(data, partitions) {
   return(result)
 }
 
+## Calculo da distancia entre símbolos
 symbolsDist <- function(val1 , val2, partitions) {
   partLimits <- gaussianEqProbPartitions(partitions)
   val1 <- match(val1, letters)
@@ -96,6 +100,7 @@ symbolsDist <- function(val1 , val2, partitions) {
   }  
 }
 
+## Função para calculo da MINDIST entre series
 minDist <- function(data1, data2, dimens, origLength, partitions) {
   combinationSize <- origLength / dimens
   result <- 0
@@ -106,6 +111,7 @@ minDist <- function(data1, data2, dimens, origLength, partitions) {
   return(result)
 }
 
+## Função para gerar as labels dos gráficos
 genLabelsPerPartition <- function(data, partitions, totalSize) {
   symbols <- convertToEqualProbSymbols(data, partitions)
   reps <- totalSize / length(data)
@@ -124,15 +130,16 @@ genLabelsPerPartition <- function(data, partitions, totalSize) {
   return(result)
 }
 
+## Função para gerar os gráficos de comparação das séries dado o número de 
+## partições e dimensões.
 plotDiscrete <- function(ANorm, BNorm, numPartitions, dimens) {
   size <- length(ANorm)
   points <- c(1:size)
   partitions <- gaussianEqProbPartitions(numPartitions)
-  
+  # aplica PAA
   APaa <- paa(ANorm, dimens)
   BPaa <- paa(BNorm, dimens)
   
-  Asym <- convertToEqualProbSymbols(APaa,i)
   APaaPlot <- rep(APaa, times=1, each=6)
   BPaaPlot <- rep(BPaa, times=1, each=6)
   Alabels <- genLabelsPerPartition(APaa, numPartitions, size)
@@ -160,14 +167,16 @@ plotDiscrete <- function(ANorm, BNorm, numPartitions, dimens) {
   return(g)
 }
 
+# tamanho final da dimensão
 dimens <- 24
-
+# séries normalizadas
 ANorm <- normalize(A)
 BNorm <- normalize(B)
-
+# PAA aplicada
 APaa <- paa(ANorm, dimens)
 BPaa <- paa(BNorm, dimens)
 
+# discretizar e calcular distancias
 for (i in c(4:7)) {
   ASym <- convertToEqualProbSymbols(APaa,i)
   BSym <- convertToEqualProbSymbols(BPaa,i)
@@ -175,6 +184,7 @@ for (i in c(4:7)) {
   print(minDist(ASym,BSym,dimens,length(A),i))
 }
 
+# gerar gráficos
 plotDiscrete(ANorm, BNorm, 4, dimens)
 plotDiscrete(ANorm, BNorm, 5, dimens)
 plotDiscrete(ANorm, BNorm, 6, dimens)
